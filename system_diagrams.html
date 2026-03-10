@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusOne System Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 60px;
+        }
+
+        .slide {
+            width: 1280px;
+            height: 720px;
+            background-color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+            border-radius: 12px;
+            page-break-after: always;
+        }
+
+        .title-container {
+            position: absolute;
+            top: 40px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .slide-title {
+            font-size: 34px;
+            font-weight: 800;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: inline-block;
+            border-bottom: 4px solid #3b82f6;
+            padding-bottom: 8px;
+        }
+
+        /* High Quality Connection Lines */
+        .line-v {
+            width: 3px;
+            background-color: #475569;
+            position: absolute;
+        }
+
+        .line-h {
+            height: 3px;
+            background-color: #475569;
+            position: absolute;
+        }
+
+        .arrow-up {
+            width: 0;
+            height: 0;
+            position: absolute;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 12px solid #475569;
+            transform: translateX(-50%);
+        }
+
+        .arrow-down {
+            width: 0;
+            height: 0;
+            position: absolute;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 12px solid #475569;
+            transform: translateX(-50%);
+        }
+
+        .arrow-left {
+            width: 0;
+            height: 0;
+            position: absolute;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-right: 12px solid #475569;
+            transform: translateY(-50%);
+        }
+
+        .arrow-right {
+            width: 0;
+            height: 0;
+            position: absolute;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 12px solid #475569;
+            transform: translateY(-50%);
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+                gap: 0;
+            }
+
+            .slide {
+                box-shadow: none;
+                border-radius: 0;
+                width: 100vw;
+                height: 100vh;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ==========================================
+         SLIDE 1: SYSTEM ARCHITECTURE
+    =========================================== -->
+    <div class="slide">
+        <div class="title-container">
+            <h1 class="slide-title">SYSTEM ARCHITECTURE</h1>
+        </div>
+
+        <!-- Root Node -->
+        <div
+            class="absolute top-[150px] left-[50%] -translate-x-[50%] w-[420px] h-[95px] bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] rounded-xl flex flex-col justify-center items-center shadow-lg border-4 border-[#bfdbfe] text-white z-20">
+            <div class="text-[28px] font-bold tracking-wider">HOME INTERFACE</div>
+            <div class="text-[18px] font-medium text-blue-100">(Flutter Mobile App)</div>
+        </div>
+
+        <!-- Main Split Lines -->
+        <div class="line-v top-[245px] left-[640px] h-[35px]"></div>
+        <div class="line-h top-[280px] left-[320px] w-[640px]"></div>
+
+        <!-- LEFT BRANCH -->
+        <div class="line-v top-[280px] left-[320px] h-[40px]"></div>
+        <div class="arrow-down top-[320px] left-[320px]"></div>
+
+        <div
+            class="absolute top-[320px] left-[320px] -translate-x-[50%] w-[380px] h-[60px] bg-white border-[3px] border-[#cbd5e1] rounded-full flex justify-center items-center shadow text-[#334155] font-bold text-[20px] z-10">
+            STUDENT & STAFF ACCESS
+        </div>
+
+        <div class="line-v top-[380px] left-[320px] h-[30px]"></div>
+
+        <!-- Student Interface -->
+        <div
+            class="absolute top-[410px] left-[320px] -translate-x-[50%] w-[420px] h-[120px] bg-white border-[3px] border-[#818cf8] rounded-xl shadow-md p-4 z-10 flex flex-col items-center justify-center">
+            <div class="font-bold text-[20px] text-[#4f46e5] mb-2 flex items-center gap-2">🎓 Student Interface</div>
+            <div class="text-[14px] text-center text-[#475569] leading-relaxed">
+                Apply Gate Pass &bull; Active E-Pass (QR)<br>
+                Digital ID Card &bull; Canteen Pre-Orders<br>
+                History &bull; Edit Profile
+            </div>
+        </div>
+
+        <div class="line-v top-[530px] left-[320px] h-[30px]"></div>
+
+        <!-- Mentor Interface -->
+        <div
+            class="absolute top-[560px] left-[320px] -translate-x-[50%] w-[420px] h-[80px] bg-white border-[3px] border-[#818cf8] rounded-xl shadow-md p-4 z-10 flex flex-col items-center justify-center">
+            <div class="font-bold text-[20px] text-[#4f46e5] mb-1 flex items-center gap-2">🧑‍🏫 Mentor Interface</div>
+            <div class="text-[14px] text-center text-[#475569]">View Assigned Students &bull; Profile Management</div>
+        </div>
+
+
+        <!-- RIGHT BRANCH -->
+        <div class="line-v top-[280px] left-[960px] h-[40px]"></div>
+        <div class="arrow-down top-[320px] left-[960px]"></div>
+
+        <div
+            class="absolute top-[320px] left-[960px] -translate-x-[50%] w-[380px] h-[60px] bg-white border-[3px] border-[#cbd5e1] rounded-full flex justify-center items-center shadow text-[#334155] font-bold text-[20px] z-10">
+            ADMIN & CONTROL ACCESS
+        </div>
+
+        <div class="line-v top-[380px] left-[960px] h-[30px]"></div>
+
+        <!-- HOD Interface -->
+        <div
+            class="absolute top-[410px] left-[960px] -translate-x-[50%] w-[420px] h-[100px] bg-white border-[3px] border-[#10b981] rounded-xl shadow-md p-4 z-10 flex flex-col items-center justify-center">
+            <div class="font-bold text-[20px] text-[#059669] mb-2 flex items-center gap-2">💼 HOD Interface</div>
+            <div class="text-[14px] text-center text-[#475569] leading-relaxed">
+                Review Pass Queue (Approve/Reject) &bull; Security Feed<br>
+                Student Directory &bull; Detailed Pass View
+            </div>
+        </div>
+
+        <div class="line-v top-[510px] left-[960px] h-[20px]"></div>
+        <div class="line-h top-[530px] left-[800px] w-[320px]"></div>
+
+        <div class="line-v top-[530px] left-[800px] h-[20px]"></div>
+        <div class="line-v top-[530px] left-[1120px] h-[20px]"></div>
+
+        <!-- Security Interface -->
+        <div
+            class="absolute top-[550px] left-[800px] -translate-x-[50%] w-[280px] h-[90px] bg-white border-[3px] border-[#f59e0b] rounded-xl shadow-md p-4 z-10 flex flex-col items-center justify-center">
+            <div class="font-bold text-[18px] text-[#d97706] mb-1">🛡️ Security Interface</div>
+            <div class="text-[14px] text-center text-[#475569]">QR Scanner <br> Verify Student Exits</div>
+        </div>
+
+        <!-- Canteen Interface -->
+        <div
+            class="absolute top-[550px] left-[1120px] -translate-x-[50%] w-[280px] h-[90px] bg-white border-[3px] border-[#ef4444] rounded-xl shadow-md p-4 z-10 flex flex-col items-center justify-center">
+            <div class="font-bold text-[18px] text-[#dc2626] mb-1">🍽️ Canteen Interface</div>
+            <div class="text-[14px] text-center text-[#475569]">Manage Pre-Orders <br> Update Menu</div>
+        </div>
+    </div>
+
+
+    <!-- ==========================================
+         SLIDE 2: ADMIN INTERFACE
+    =========================================== -->
+    <div class="slide">
+        <div class="title-container">
+            <h1 class="slide-title">SYSTEM ARCHITECTURE - ADMIN INTERFACE</h1>
+        </div>
+
+        <!-- Auth Start -->
+        <div
+            class="absolute top-[160px] left-[200px] -translate-x-[50%] w-[220px] h-[85px] bg-white border-[3px] border-[#334155] rounded-xl shadow-md flex flex-col justify-center items-center z-20">
+            <div class="font-bold text-[20px] text-[#0f172a]">User Login</div>
+            <div class="text-[14px] text-[#64748b] mt-1">Email / Password</div>
+        </div>
+
+        <!-- Firebase Auth -->
+        <div
+            class="absolute top-[160px] left-[520px] -translate-x-[50%] w-[220px] h-[85px] bg-[#fdf6e3] border-[3px] border-[#f59e0b] rounded-xl shadow-md flex flex-col justify-center items-center z-20">
+            <div class="font-bold text-[20px] text-[#d97706] mb-1">Firebase Auth</div>
+            <div class="text-[14px] text-[#b45309]">Validate Credentials</div>
+        </div>
+
+        <div class="line-h top-[202px] left-[310px] w-[100px]"></div>
+        <div class="arrow-right top-[202px] left-[410px]"></div>
+
+        <!-- Invalid Line -->
+        <div class="line-v top-[245px] left-[520px] h-[105px]"></div>
+        <div class="arrow-down top-[350px] left-[520px]"></div>
+
+        <!-- Access Denied Box -->
+        <div
+            class="absolute top-[350px] left-[400px] w-[240px] h-[60px] bg-[#fecaca] border-[3px] border-[#ef4444] rounded-xl flex items-center justify-center gap-x-3 shadow-md text-[#b91c1c] font-bold text-[18px] z-10">
+            <div class="w-6 h-6 rounded-full bg-[#b91c1c] text-white flex items-center justify-center text-[12px]">✖
+            </div>
+            Access Denied
+        </div>
+
+        <!-- Valid Label -->
+        <div
+            class="absolute top-[210px] left-[690px] w-[140px] text-center font-bold text-[#059669] z-30 bg-white/80 py-1">
+            Credentials Valid</div>
+
+        <!-- Valid Flow Lines -->
+        <div class="line-h top-[202px] left-[630px] w-[130px]"></div>
+        <div class="line-v top-[202px] left-[760px] h-[78px]"></div>
+        <div class="arrow-down top-[280px] left-[760px]"></div>
+
+        <!-- HOD Dashboard Main -->
+        <div
+            class="absolute top-[280px] left-[760px] -translate-x-[50%] w-[280px] h-[80px] bg-gradient-to-b from-[#15803d] to-[#166534] rounded-xl flex justify-center items-center shadow-lg text-white font-bold text-[20px] z-30 border-[3px] border-dashed border-[#86efac] text-center leading-tight">
+            Admin / HOD Dashboard
+        </div>
+
+        <!-- Cloud Firestore DB Box -->
+        <div
+            class="absolute top-[400px] left-[320px] w-[400px] h-[260px] bg-[#f0f9ff] border-[4px] border-[#0ea5e9] rounded-2xl shadow-lg z-20 flex flex-col items-center pt-5">
+            <div class="font-bold text-[20px] text-[#0369a1] mb-4 tracking-wide uppercase">Cloud Firestore Database
+            </div>
+
+            <div
+                class="w-[340px] h-[45px] bg-white border border-[#bae6fd] rounded shadow-sm flex justify-between items-center px-4 mb-3">
+                <span class="font-bold text-[#0c4a6e]">users</span>
+                <span class="text-[12px] text-[#64748b] bg-[#e0f2fe] px-2 py-1 rounded">Profiles & Roles</span>
+            </div>
+
+            <div
+                class="w-[340px] h-[45px] bg-white border border-[#bae6fd] rounded shadow-sm flex justify-between items-center px-4 mb-3">
+                <span class="font-bold text-[#0c4a6e]">gate_passes</span>
+                <span class="text-[12px] text-[#64748b] bg-[#e0f2fe] px-2 py-1 rounded">Pass Records</span>
+            </div>
+
+            <div
+                class="w-[340px] h-[45px] bg-white border border-[#bae6fd] rounded shadow-sm flex justify-between items-center px-4">
+                <span class="font-bold text-[#0c4a6e]">canteen</span>
+                <span class="text-[12px] text-[#64748b] bg-[#e0f2fe] px-2 py-1 rounded">Food Cart</span>
+            </div>
+        </div>
+
+        <!-- Right Side HOD Modules -->
+        <div
+            class="absolute top-[260px] left-[900px] w-[340px] h-[80px] bg-white border-[3px] border-[#10b981] rounded-xl shadow-md flex flex-col justify-center pl-6 z-20">
+            <div class="font-bold text-[18px] text-[#059669] mb-1 text-center">Manage Gate Pass Requests</div>
+            <div class="text-[13px] text-[#64748b] text-center">Reads Queue -> Updates Status</div>
+        </div>
+
+        <div
+            class="absolute top-[380px] left-[900px] w-[340px] h-[80px] bg-white border-[3px] border-[#10b981] rounded-xl shadow-md flex flex-col justify-center pl-6 z-20">
+            <div class="font-bold text-[18px] text-[#059669] mb-1 text-center">Monitor Student Feed</div>
+            <div class="text-[13px] text-[#64748b] text-center">Views Security Logs & Pass History</div>
+        </div>
+
+        <div
+            class="absolute top-[500px] left-[900px] w-[340px] h-[80px] bg-white border-[3px] border-[#10b981] rounded-xl shadow-md flex flex-col justify-center pl-6 z-20">
+            <div class="font-bold text-[18px] text-[#059669] mb-1 text-center">Review Student Directory</div>
+            <div class="text-[13px] text-[#64748b] text-center">Fetch Active User Profiles</div>
+        </div>
+
+        <!-- Dynamic Links from Dashboard to Modules -->
+        <div class="line-h top-[320px] left-[840px] w-[30px]"></div>
+        <div class="line-v top-[300px] left-[870px] h-[240px]"></div>
+
+        <div class="line-h top-[300px] left-[870px] w-[30px]"></div>
+        <div class="arrow-right top-[300px] left-[900px]"></div>
+
+        <div class="line-h top-[420px] left-[870px] w-[30px]"></div>
+        <div class="arrow-right top-[420px] left-[900px]"></div>
+
+        <div class="line-h top-[540px] left-[870px] w-[30px]"></div>
+        <div class="arrow-right top-[540px] left-[900px]"></div>
+
+        <!-- Links from Modules to Firestore -->
+        <div class="line-v top-[510px] left-[760px] h-[80px]"></div>
+        <div class="line-h top-[590px] left-[760px] w-[310px]"></div>
+        <div class="line-v top-[580px] left-[1070px] h-[10px]"></div>
+
+        <div class="line-h top-[460px] left-[1070px] w-[110px]"></div>
+        <div class="line-v top-[460px] left-[1180px] h-[160px]"></div>
+        <div class="line-h top-[620px] left-[520px] w-[660px]"></div>
+        <div class="line-v top-[620px] left-[520px] h-[40px]"></div>
+        <div class="arrow-up top-[660px] left-[520px]"></div>
+
+    </div>
+
+
+    <!-- ==========================================
+         SLIDE 3: USE CASE DIAGRAM
+    =========================================== -->
+    <div class="slide">
+        <div class="title-container">
+            <h1 class="slide-title">USE CASE DIAGRAM</h1>
+        </div>
+
+        <!-- System Box -->
+        <div
+            class="absolute top-[130px] left-[260px] w-[760px] h-[540px] border-[3px] border-dashed border-[#94a3b8] rounded-[24px] bg-white z-[5]">
+        </div>
+        <div class="absolute top-[110px] left-[290px] bg-white px-4 font-bold text-[#334155] text-[20px] z-[10]">
+            CampusOne System Boundary</div>
+
+        <!-- Lines Wrapper for crisp visibility -->
+        <svg class="absolute top-0 left-0 w-full h-full pointer-events-none" style="z-index: 6;">
+            <!-- Student Connections to LEFT edge of bubbles -->
+            <!-- Student Center: (150, 400) -->
+            <!-- Bubble Centers-X is approx 450, Left-Edge is approx 320 -->
+            <line x1="180" y1="400" x2="310" y2="200" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,6" />
+            <line x1="180" y1="400" x2="310" y2="290" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,6" />
+            <line x1="180" y1="400" x2="310" y2="380" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,6" />
+            <line x1="180" y1="400" x2="310" y2="470" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,6" />
+            <line x1="180" y1="400" x2="310" y2="560" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,6" />
+
+            <!-- HOD Connections to RIGHT edge of bubbles -->
+            <line x1="1100" y1="230" x2="970" y2="200" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,6" />
+            <line x1="1100" y1="230" x2="970" y2="300" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,6" />
+
+            <!-- Security Connections -->
+            <line x1="1100" y1="420" x2="970" y2="420" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,6" />
+
+            <!-- Canteen Connections -->
+            <line x1="1100" y1="580" x2="970" y2="560" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,6" />
+        </svg>
+
+        <!-- ======================= 
+             ACTORS 
+        ======================== -->
+
+        <div class="absolute top-[340px] left-[100px] flex flex-col items-center w-[100px] z-20">
+            <div class="text-[50px]">👩‍🎓</div>
+            <div class="mt-2 text-[24px] font-bold text-[#1e293b]">Student</div>
+        </div>
+
+        <div class="absolute top-[170px] left-[1080px] flex flex-col items-center w-[120px] z-20">
+            <div class="text-[50px]">🧑‍💼</div>
+            <div class="mt-2 text-[22px] font-bold text-[#1e293b] text-center">Admin/HOD</div>
+        </div>
+
+        <div class="absolute top-[370px] left-[1080px] flex flex-col items-center w-[100px] z-20">
+            <div class="text-[50px]">👮‍♂️</div>
+            <div class="mt-2 text-[22px] font-bold text-[#1e293b]">Security</div>
+        </div>
+
+        <div class="absolute top-[520px] left-[1080px] flex flex-col items-center w-[120px] z-20">
+            <div class="text-[50px]">👨‍🍳</div>
+            <div class="mt-1 text-[22px] font-bold text-[#1e293b] text-center">Canteen Staff</div>
+        </div>
+
+        <!-- ======================= 
+             USE CASES 
+        ======================== -->
+
+        <!-- Student Ovals -->
+        <div
+            class="absolute top-[165px] left-[320px] w-[260px] h-[70px] bg-[#f5f3ff] border-[3px] border-[#8b5cf6] rounded-full flex justify-center items-center shadow-sm z-20 transition-transform">
+            <div class="font-bold text-[#5b21b6] text-center text-[15px] px-4 leading-tight">Apply Normal <br> or
+                Emergency Pass</div>
+        </div>
+
+        <div
+            class="absolute top-[255px] left-[320px] w-[260px] h-[70px] bg-[#f5f3ff] border-[3px] border-[#8b5cf6] rounded-full flex justify-center items-center shadow-sm z-20">
+            <div class="font-bold text-[#5b21b6] text-center text-[15px] px-4 leading-tight">Generate E-Pass QR <br>
+                (Active Pass)</div>
+        </div>
+
+        <div
+            class="absolute top-[345px] left-[320px] w-[260px] h-[70px] bg-[#f5f3ff] border-[3px] border-[#8b5cf6] rounded-full flex justify-center items-center shadow-sm z-20">
+            <div class="font-bold text-[#5b21b6] text-center text-[15px] px-4 leading-tight">Show Digital ID Card</div>
+        </div>
+
+        <div
+            class="absolute top-[435px] left-[320px] w-[260px] h-[70px] bg-[#f5f3ff] border-[3px] border-[#8b5cf6] rounded-full flex justify-center items-center shadow-sm z-20">
+            <div class="font-bold text-[#5b21b6] text-center text-[15px] px-4 leading-tight">Place Canteen Order</div>
+        </div>
+
+        <div
+            class="absolute top-[525px] left-[320px] w-[260px] h-[70px] bg-[#f5f3ff] border-[3px] border-[#8b5cf6] rounded-full flex justify-center items-center shadow-sm z-20">
+            <div class="font-bold text-[#5b21b6] text-center text-[15px] px-4 leading-tight">View Pass & <br> Order
+                History</div>
+        </div>
+
+        <!-- HOD Ovals -->
+        <div
+            class="absolute top-[165px] left-[700px] w-[260px] h-[70px] bg-[#ecfdf5] border-[3px] border-[#10b981] rounded-full flex justify-center items-center shadow-sm z-20">
+            <div class="font-bold text-[#065f46] text-center text-[15px] px-4 leading-tight">Review Queue <br>
+                (Approve/Reject)</div>
+        </div>
+
+        <div
+            class="absolute top-[265px] left-[700px] w-[260px] h-[70px] bg-[#ecfdf5] border-[3px] border-[#10b981] rounded-full flex justify-center items-center shadow-sm z-20">
+            <div class="font-bold text-[#065f46] text-center text-[15px] px-4 leading-tight">View Student Directory
+            </div>
+        </div>
+
+        <!-- Security Oval -->
+        <div
+            class="absolute top-[385px] left-[700px] w-[260px] h-[70px] bg-[#fff7ed] border-[3px] border-[#f59e0b] rounded-full flex justify-center items-center shadow-sm z-20">
+            <div class="font-bold text-[#92400e] text-center text-[15px] px-4 leading-tight">Scan E-Pass QR <br> via
+                Camera</div>
+        </div>
+
+        <!-- Canteen Oval -->
+        <div
+            class="absolute top-[525px] left-[700px] w-[260px] h-[70px] bg-[#fef2f2] border-[3px] border-[#ef4444] rounded-full flex justify-center items-center shadow-sm z-20">
+            <div class="font-bold text-[#991b1b] text-center text-[15px] px-4 leading-tight">Process Orders & <br>
+                Update Menu</div>
+        </div>
+    </div>
+
+
+    <!-- ==========================================
+         SLIDE 4: END TO END FLOW
+    =========================================== -->
+    <div class="slide">
+        <div class="title-container">
+            <h1 class="slide-title">SYSTEM ARCHITECTURE - STUDENT INTERFACE</h1>
+        </div>
+
+        <div class="w-full h-full pt-[140px] px-16 relative">
+
+            <!-- Phase 1: Student Request -->
+            <div
+                class="absolute top-[180px] left-[50px] w-[340px] h-[440px] bg-white border-[3px] border-[#e2e8f0] shadow-md rounded-[20px] flex flex-col items-center pt-8 z-20">
+                <div class="bg-[#eef2ff] text-[#4f46e5] font-bold px-6 py-2 rounded-full mb-8 text-[16px]">Phase 1:
+                    Student Request</div>
+
+                <div
+                    class="w-[280px] h-[80px] bg-gradient-to-r from-[#4f46e5] to-[#6366f1] text-white rounded-xl flex items-center justify-center font-bold text-[18px] mb-10 shadow-md">
+                    Student Dashboard</div>
+
+                <div class="arrow-down top-[200px] left-[170px] !border-t-[#cbd5e1]"></div>
+
+                <div
+                    class="w-[280px] h-[80px] bg-gradient-to-r from-[#818cf8] to-[#6366f1] text-white rounded-xl flex flex-col items-center justify-center font-bold text-center mb-10 shadow-md text-[16px]">
+                    <div>Apply Pass Screen</div>
+                    <div class="font-medium text-[13px] opacity-90">(Reason, Type, Dates)</div>
+                </div>
+
+                <div class="arrow-down top-[310px] left-[170px] !border-t-[#cbd5e1]"></div>
+
+                <div
+                    class="w-[280px] h-[80px] bg-[#f8fafc] border-[3px] border-[#818cf8] text-[#4f46e5] rounded-xl flex flex-col items-center justify-center font-bold text-center border-dashed text-[16px]">
+                    <div>Save to Firestore</div>
+                    <div class="text-[14px]">Status: Pending</div>
+                </div>
+            </div>
+
+            <!-- Inter-Phase Arrow -->
+            <div class="line-h top-[400px] left-[390px] w-[70px]"></div>
+            <div class="arrow-right top-[400px] left-[460px]"></div>
+
+            <!-- Phase 2: HOD Approval -->
+            <div
+                class="absolute top-[180px] left-[460px] w-[340px] h-[440px] bg-white border-[3px] border-[#e2e8f0] shadow-md rounded-[20px] flex flex-col items-center pt-8 z-20">
+                <div class="bg-[#ecfdf5] text-[#059669] font-bold px-6 py-2 rounded-full mb-8 text-[16px]">Phase 2: HOD
+                    Approval</div>
+
+                <div
+                    class="w-[280px] h-[80px] bg-gradient-to-r from-[#059669] to-[#10b981] text-white rounded-xl flex items-center justify-center font-bold text-[18px] mb-10 shadow-md">
+                    HOD Dashboard</div>
+
+                <div
+                    class="w-[280px] h-[80px] bg-gradient-to-r from-[#34d399] to-[#10b981] text-white rounded-xl flex flex-col items-center justify-center font-bold text-center mb-10 shadow-md text-[16px]">
+                    <div>Review Queue Screen</div>
+                    <div class="font-medium text-[13px] opacity-90">(Approve/Reject)</div>
+                </div>
+
+                <div
+                    class="w-[280px] h-[80px] bg-[#f8fafc] border-[3px] border-[#34d399] text-[#059669] rounded-xl flex flex-col items-center justify-center font-bold text-center border-dashed text-[16px]">
+                    <div>Update in Firestore</div>
+                    <div class="text-[14px]">Status: Approved</div>
+                </div>
+            </div>
+
+            <!-- Inter-Phase Arrow -->
+            <div class="line-h top-[400px] left-[800px] w-[70px]"></div>
+            <div class="arrow-right top-[400px] left-[870px]"></div>
+
+            <!-- Phase 3: Security Execution -->
+            <div
+                class="absolute top-[180px] left-[870px] w-[360px] h-[440px] bg-white border-[3px] border-[#e2e8f0] shadow-md rounded-[20px] flex flex-col items-center pt-8 z-20">
+                <div class="bg-[#fffbeb] text-[#d97706] font-bold px-6 py-2 rounded-full mb-8 text-[16px]">Phase 3:
+                    Execution</div>
+
+                <div class="flex gap-4 w-full px-5 mb-10 justify-center">
+                    <div
+                        class="w-[155px] h-[80px] bg-gradient-to-br from-[#4f46e5] to-[#6366f1] text-white rounded-xl flex items-center justify-center font-bold text-center text-[14px] shadow-md leading-snug px-2">
+                        Student shows Active Pass (QR)</div>
+                    <div
+                        class="w-[155px] h-[80px] bg-gradient-to-br from-[#d97706] to-[#f59e0b] text-white rounded-xl flex items-center justify-center font-bold text-center text-[14px] shadow-md px-2">
+                        Security uses QR Scanner</div>
+                </div>
+
+                <div
+                    class="w-[320px] h-[80px] bg-[#fef3c7] border-[2px] border-[#f59e0b] text-[#92400e] rounded-xl flex items-center justify-center font-bold text-[18px] mb-10 shadow-sm px-4">
+                    Scan QR -> DB Verification</div>
+
+                <div
+                    class="w-[320px] h-[80px] bg-[#f8fafc] border-[3px] border-[#94a3b8] text-[#334155] rounded-xl flex flex-col items-center justify-center font-bold text-center text-[16px]">
+                    <div>Log Exit / Entry Time</div>
+                    <div class="font-medium text-[14px]">in Database History</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

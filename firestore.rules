@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is accessing their own document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users collection rules
+    match /users/{userId} {
+      // Allow any authenticated user to read profiles (needed for Mentors to see student details)
+      allow read: if isAuthenticated();
+      // Allow user to write their own profile (enables registration)
+      allow write: if isOwner(userId);
+      // Allow mentors/admins to update specific fields like mentorId and deviceId
+      allow update: if isAuthenticated();
+    }
+    
+    // Gate Passes rules
+    match /gate_pass_requests/{passId} {
+        allow read: if isAuthenticated();
+        // Allow creation by students
+        allow create: if isAuthenticated(); 
+        // Allow updates by any authenticated user (refined role-checks can be added later)
+        allow update: if isAuthenticated();
+    }
+
+    // Gate Pass Logs rules
+    match /gate_pass_logs/{logId} {
+        allow read, write: if isAuthenticated();
+    }
+
+    // Canteen Rules
+    // Canteen Rules - DEBUG MODE (Public Access)
+    match /canteen_menu/{itemId} {
+        allow read, write: if true;
+    }
+    match /canteen_orders/{orderId} {
+        allow read, write: if true;
+    }
+    match /canteen_profile/{docId} {
+        allow read: if true;
+        allow write: if isAuthenticated();
+    }
+  }
+}
