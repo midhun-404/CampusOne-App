@@ -4,7 +4,7 @@
 
 CampusOne is a comprehensive Android application designed to digitize and streamline campus operations. It replaces manual paperwork with a modern, fast, and secure digital ecosystem, featuring role-based dashboards, a real-time QR code gate pass system, AI assistance, and a full-fledged canteen ordering system!
 
-🌐 **[Test the App Live (No Installation Required!)](https://appetize.io/)** *(Replace with your Appetize.io link!)*
+🌐 **[Test the App Live (No Installation Required!)](https://appetize.io/app/b_zqvq37zti7qmipgjwwwkgosona)**
 
 ## ✨ Key Features
 
