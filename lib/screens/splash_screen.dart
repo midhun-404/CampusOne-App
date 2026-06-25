@@ -62,6 +62,9 @@ class _SplashScreenState extends State<SplashScreen> {
       case AppConstants.roleCanteen:
         context.go('/canteen');
         break;
+      case AppConstants.roleAdmin:
+        context.go('/admin');
+        break;
       default:
         context.go('/login');
     }

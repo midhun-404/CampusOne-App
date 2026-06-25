@@ -101,6 +101,7 @@ class _MentorEditProfileScreenState extends State<MentorEditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthService>(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Edit Staff Profile')),
       backgroundColor: AppTheme.lightBg,
@@ -155,21 +156,23 @@ class _MentorEditProfileScreenState extends State<MentorEditProfileScreen> {
                       ),
                       const SizedBox(height: 16),
                       
-                      _buildDropdown(
-                        label: 'Mentoring Semester',
-                        icon: Icons.timeline,
-                        value: _selectedSem,
-                        items: _semesters,
-                        onChanged: (val) => setState(() => _selectedSem = val!),
-                      ),
-                      const SizedBox(height: 16),
-                      
-                      _buildTextField(
-                        controller: _divisionCtrl,
-                        label: 'Mentoring Division (e.g. A, B)',
-                        icon: Icons.people,
-                      ),
-                      const SizedBox(height: 32),
+                      if (auth.currentUser?.role == 'Mentor') ...[
+                        _buildDropdown(
+                          label: 'Mentoring Semester',
+                          icon: Icons.timeline,
+                          value: _selectedSem,
+                          items: _semesters,
+                          onChanged: (val) => setState(() => _selectedSem = val!),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        _buildTextField(
+                          controller: _divisionCtrl,
+                          label: 'Mentoring Division (e.g. A, B)',
+                          icon: Icons.people,
+                        ),
+                        const SizedBox(height: 32),
+                      ],
                       
                       SizedBox(
                         width: double.infinity,

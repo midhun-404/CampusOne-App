@@ -97,7 +97,7 @@ class _HistoryCard extends StatelessWidget {
               children: [
                 Text(
                   DateFormat.yMMMd().format(pass.appliedAt),
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.darkSurface),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

@@ -6,6 +6,7 @@ import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/sms_service.dart';
 import '../../services/notification_service.dart';
+import '../../services/ai_service.dart';
 import '../../models/gate_pass_model.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_theme.dart';
@@ -22,6 +23,7 @@ class _ApplyPassScreenState extends State<ApplyPassScreen> {
   final _destinationCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  bool _isSuggestingReason = false;
   String _passType = AppConstants.passTypeShort;
   TimeOfDay? _returnTime;
   TimeOfDay? _leavingTime;
@@ -31,6 +33,22 @@ class _ApplyPassScreenState extends State<ApplyPassScreen> {
     _reasonCtrl.dispose();
     _destinationCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _suggestReason() async {
+    final destination = _destinationCtrl.text.trim();
+    if (destination.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a destination first')),
+      );
+      return;
+    }
+    setState(() => _isSuggestingReason = true);
+    final suggested = await AiService.suggestPassReason(destination);
+    if (mounted) {
+      _reasonCtrl.text = suggested;
+      setState(() => _isSuggestingReason = false);
+    }
   }
 
   void _submitPass() async {
@@ -329,6 +347,54 @@ class _ApplyPassScreenState extends State<ApplyPassScreen> {
                             hint: 'Why do you need to leave?',
                             icon: Icons.info_outline,
                             maxLines: 2,
+                          ),
+                          const SizedBox(height: 8),
+                          // AI Suggest button
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: GestureDetector(
+                              onTap: _isSuggestingReason ? null : _suggestReason,
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                decoration: BoxDecoration(
+                                  gradient: _isSuggestingReason
+                                      ? null
+                                      : const LinearGradient(
+                                          colors: [Color(0xFFEAB360), Color(0xFFD4943A)],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                  color: _isSuggestingReason ? Colors.grey.shade200 : null,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (_isSuggestingReason)
+                                      const SizedBox(
+                                        width: 12,
+                                        height: 12,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.grey,
+                                        ),
+                                      )
+                                    else
+                                      const Icon(Icons.auto_awesome, size: 14, color: Colors.white),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      _isSuggestingReason ? 'Generating...' : 'AI Suggest',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: _isSuggestingReason ? Colors.grey : Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                           const SizedBox(height: 20),
                           

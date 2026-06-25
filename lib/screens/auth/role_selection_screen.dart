@@ -7,27 +7,23 @@ import '../../core/constants/app_constants.dart';
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
 
-  Widget _buildRoleCard(BuildContext context, String title, IconData icon, String role) {
-    bool isStudent = role == AppConstants.roleStudent;
-    
+  Widget _buildStudentCard(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.push('/login', extra: role);
+        context.push('/login', extra: AppConstants.roleStudent);
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: const EdgeInsets.only(bottom: 24),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           gradient: LinearGradient(
-            colors: isStudent 
-              ? [AppTheme.primaryBlue.withOpacity(0.8), AppTheme.primaryBlue.withOpacity(0.4)]
-              : [AppTheme.darkSurface.withOpacity(0.8), AppTheme.darkSurface.withOpacity(0.4)],
+            colors: [AppTheme.primaryBlue, AppTheme.primaryBlue.withOpacity(0.7)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           border: Border.all(
-            color: isStudent ? AppTheme.primaryBlue.withOpacity(0.5) : Colors.white12,
-            width: 1.5,
+            color: Colors.white.withOpacity(0.3),
+            width: 2,
           ),
         ),
         child: ClipRRect(
@@ -35,42 +31,105 @@ class RoleSelectionScreen extends StatelessWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isStudent ? Colors.white.withOpacity(0.2) : AppTheme.primaryBlue.withOpacity(0.1),
+                      color: Colors.white.withOpacity(0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(icon, color: isStudent ? Colors.white : AppTheme.primaryBlue, size: 28),
+                    child: const Icon(Icons.school, color: Colors.white, size: 28),
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          title,
+                        const Text(
+                          "Student",
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: isStudent ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                            color: Colors.white,
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          isStudent ? "Create an account or login" : "Admin credentials required",
+                        const Text(
+                          "Create an account or login",
                           style: TextStyle(
-                            fontSize: 12,
-                            color: isStudent ? Colors.white70 : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                            fontSize: 13,
+                            color: Colors.white70,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Icon(Icons.arrow_forward_ios, color: isStudent ? Colors.white : AppTheme.primaryBlue, size: 16),
+                  const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 18),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGridCard(BuildContext context, String title, IconData icon, String role) {
+    return GestureDetector(
+      onTap: () {
+        context.push('/login', extra: role);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: [Colors.white, Colors.white.withOpacity(0.9)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(
+            color: AppTheme.primaryBlue.withOpacity(0.2),
+            width: 2,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryBlue.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, color: AppTheme.primaryBlue, size: 28),
+                  ),
+                  const Spacer(),
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Admin access",
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -89,7 +148,7 @@ class RoleSelectionScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               Text(
                 "Welcome to",
                 style: TextStyle(
@@ -107,7 +166,7 @@ class RoleSelectionScreen extends StatelessWidget {
                   letterSpacing: 1.2,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Text(
                 "Please select your role to continue.",
                 style: TextStyle(
@@ -115,16 +174,31 @@ class RoleSelectionScreen extends StatelessWidget {
                   color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 24),
+              _buildStudentCard(context),
+              Text(
+                "Staff & Administration",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                ),
+              ),
+              const SizedBox(height: 16),
               Expanded(
-                child: ListView(
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 1.1,
                   physics: const BouncingScrollPhysics(),
                   children: [
-                    _buildRoleCard(context, "Student", Icons.school, AppConstants.roleStudent),
-                    _buildRoleCard(context, "Mentor", Icons.co_present, AppConstants.roleMentor),
-                    _buildRoleCard(context, "Head of Department", Icons.admin_panel_settings, AppConstants.roleHod),
-                    _buildRoleCard(context, "Security", Icons.security, AppConstants.roleSecurity),
-                    _buildRoleCard(context, "Canteen", Icons.fastfood, AppConstants.roleCanteen),
+                    _buildGridCard(context, "Mentor", Icons.co_present, AppConstants.roleMentor),
+                    _buildGridCard(context, "Faculty", Icons.person_outline, AppConstants.roleFaculty),
+                    _buildGridCard(context, "HOD", Icons.admin_panel_settings, AppConstants.roleHod),
+                    _buildGridCard(context, "Security", Icons.security, AppConstants.roleSecurity),
+                    _buildGridCard(context, "Canteen", Icons.fastfood, AppConstants.roleCanteen),
+                    _buildGridCard(context, "Admin", Icons.settings, AppConstants.roleAdmin),
                   ],
                 ),
               ),

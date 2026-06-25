@@ -5,6 +5,8 @@ class AppConstants {
   static const String roleHod = 'HOD';
   static const String roleSecurity = 'Security';
   static const String roleCanteen = 'Canteen';
+  static const String roleFaculty = 'Faculty';
+  static const String roleAdmin = 'Admin';
 
   static const List<String> roles = [
     roleStudent,
@@ -12,6 +14,8 @@ class AppConstants {
     roleHod,
     roleSecurity,
     roleCanteen,
+    roleFaculty,
+    roleAdmin,
   ];
 
   // Departments
@@ -37,7 +41,7 @@ class AppConstants {
   static const String passTypeFullDay = 'full_day';
 
   // Razorpay
-  static const String razorpayTestKey = 'rzp_test_SM2anoSsmV2XDw';
+  static const String razorpayTestKey = 'YOUR_RAZORPAY_TEST_KEY_HERE';
 
   // Firebase Collections
   static const String collectionUsers = 'users';
@@ -46,4 +50,5 @@ class AppConstants {
   static const String collectionCanteenMenu = 'canteen_menu';
   static const String collectionCanteenOrders = 'canteen_orders';
   static const String collectionCanteenProfile = 'canteen_profile';
+  static const String collectionNotices = 'notices';
 }

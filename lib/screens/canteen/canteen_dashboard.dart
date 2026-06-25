@@ -305,7 +305,8 @@ class _KanbanOrdersTab extends StatelessWidget {
           children: [
             _KanbanColumn(title: 'Pending', color: Colors.orange, orders: pending, nextStatus: 'Preparing', nextLabel: 'Start Preparing'),
             _KanbanColumn(title: 'Preparing', color: Colors.blue, orders: preparing, nextStatus: 'Ready', nextLabel: 'Mark Ready'),
-            _KanbanColumn(title: 'Ready 🔔', color: _kGreen, orders: ready, nextStatus: 'Delivered', nextLabel: 'Deliver'),
+            // Removed the Ready -> Delivered flow explicitly to enforce QR scanning for delivery.
+            _KanbanColumn(title: 'Ready 🔔', color: _kGreen, orders: ready, nextStatus: 'null', nextLabel: 'Scanner Only'),
           ],
         );
       },
@@ -450,45 +451,66 @@ class _KanbanCard extends StatelessWidget {
               }),
               const SizedBox(height: 16),
             ],
-            Row(
-              children: [
-                if (order.studentPhone != null)
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.phone),
-                        label: const Text('Call Student'),
-                        style: OutlinedButton.styleFrom(foregroundColor: _kAccent, side: const BorderSide(color: Colors.white24), padding: const EdgeInsets.symmetric(vertical: 14)),
-                        onPressed: () {
-                          // In a real app, use url_launcher
-                        },
+            if (nextStatus != 'null')
+              Row(
+                children: [
+                  if (order.studentPhone != null)
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.phone),
+                          label: const Text('Call Student'),
+                          style: OutlinedButton.styleFrom(foregroundColor: _kAccent, side: const BorderSide(color: Colors.white24), padding: const EdgeInsets.symmetric(vertical: 14)),
+                          onPressed: () {
+                            // In a real app, use url_launcher
+                          },
+                        ),
                       ),
                     ),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: color, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                      onPressed: () async {
+                        Navigator.pop(ctx);
+                        await fs.updateOrderStatus(order.id, nextStatus);
+                        
+                        if (order.studentFcmToken != null && order.studentFcmToken!.isNotEmpty) {
+                          await NotificationService.sendCanteenStatusNotification(
+                            fcmToken: order.studentFcmToken!,
+                            newStatus: nextStatus,
+                            canteenName: order.canteenName ?? 'the canteen',
+                          );
+                        }
+                      },
+                      child: Text(nextLabel, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                    ),
                   ),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: color, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                    onPressed: () async {
-                      Navigator.pop(ctx);
-                      // If we didn't set prep time already (only if next is Preparing)
-                      await fs.updateOrderStatus(order.id, nextStatus);
-                      
-                      if (order.studentFcmToken != null && order.studentFcmToken!.isNotEmpty) {
-                        await NotificationService.sendCanteenStatusNotification(
-                          fcmToken: order.studentFcmToken!,
-                          newStatus: nextStatus,
-                          canteenName: order.canteenName ?? 'the canteen',
-                        );
-                      }
-                    },
-                    child: Text(nextLabel, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                ],
+              )
+            else
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: Colors.white10,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.white24)
+                ),
+                child: const Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.qr_code_scanner, color: Colors.white70, size: 20),
+                      SizedBox(width: 8),
+                      Text('Scan QR to Deliver', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
           ],
+
         ),
       ),
     );
@@ -528,60 +550,135 @@ class _PrepTimeSelectorState extends State<_PrepTimeSelector> {
 // -----------------------------------------------------------------------
 // ANALYTICS TAB
 // -----------------------------------------------------------------------
-class _AnalyticsTab extends StatelessWidget {
+class _AnalyticsTab extends StatefulWidget {
   const _AnalyticsTab();
+
+  @override
+  State<_AnalyticsTab> createState() => _AnalyticsTabState();
+}
+
+class _AnalyticsTabState extends State<_AnalyticsTab> {
+  DateTime _selectedDate = DateTime.now();
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2024),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: _kAccent,
+              onPrimary: Colors.black,
+              surface: _kCard,
+              onSurface: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() => _selectedDate = picked);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final fs = Provider.of<FirestoreService>(context);
-    return FutureBuilder<Map<String, dynamic>>(
-      future: fs.getCanteenAnalytics(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator(color: _kAccent));
-        final data = snapshot.data!;
-        final revenue = data['revenue'] as double;
-        final orders = data['orders'] as int;
-        final rating = data['avgRating'] as double;
-        final itemSales = data['itemSales'] as Map<String, int>;
-
-        return ListView(
-          padding: const EdgeInsets.all(24),
-          children: [
-            const Text('Performance Overview', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                _StatCard(title: 'Total Revenue', value: '₹${revenue.toStringAsFixed(0)}', icon: Icons.payments, color: _kGreen),
-                const SizedBox(width: 12),
-                _StatCard(title: 'Total Orders', value: '$orders', icon: Icons.shopping_basket, color: Colors.blue),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _StatCard(title: 'Avg. Rating', value: rating == 0 ? 'No ratings' : '${rating.toStringAsFixed(1)} ★', 
-                icon: Icons.star, color: _kAccent, isFullWidth: true),
-            const SizedBox(height: 32),
-            const Text('Top Selling Items', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 16),
-            ...itemSales.entries.map((e) => Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: _kCard, borderRadius: BorderRadius.circular(16)),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: _kAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                    child: const Icon(Icons.fastfood, color: _kAccent, size: 20),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(child: Text(e.key, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                  Text('${e.value} sold', style: const TextStyle(color: Colors.white54, fontSize: 13)),
-                ],
+    
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                DateFormat.yMMMd().format(_selectedDate) == DateFormat.yMMMd().format(DateTime.now()) 
+                  ? "Today's Analytics" 
+                  : DateFormat.yMMMd().format(_selectedDate),
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
               ),
-            )),
-          ],
-        );
-      },
+              ElevatedButton.icon(
+                onPressed: _pickDate,
+                icon: const Icon(Icons.calendar_month, size: 18),
+                label: const Text('Change Date'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _kCard,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: StreamBuilder<Map<String, dynamic>>(
+            stream: fs.getCanteenAnalytics(_selectedDate),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const Center(child: CircularProgressIndicator(color: _kAccent));
+              final data = snapshot.data!;
+              final revenue = data['revenue'] as double;
+              final orders = data['orders'] as int;
+              final rating = data['avgRating'] as double;
+              final itemSales = data['itemSales'] as Map<String, int>;
+
+              if (orders == 0) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.analytics_outlined, size: 64, color: Colors.white24),
+                      const SizedBox(height: 16),
+                      Text('No orders placed on ${DateFormat.yMMMd().format(_selectedDate)}', 
+                        style: const TextStyle(color: Colors.white54, fontSize: 16)),
+                    ],
+                  ),
+                );
+              }
+
+              return ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                children: [
+                  Row(
+                    children: [
+                      _StatCard(title: 'Revenue', value: '₹${revenue.toStringAsFixed(0)}', icon: Icons.payments, color: _kGreen),
+                      const SizedBox(width: 12),
+                      _StatCard(title: 'Orders', value: '$orders', icon: Icons.shopping_basket, color: Colors.blue),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _StatCard(title: 'Avg. Rating', value: rating == 0 ? 'No ratings' : '${rating.toStringAsFixed(1)} ★', 
+                      icon: Icons.star, color: _kAccent, isFullWidth: true),
+                  const SizedBox(height: 32),
+                  const Text('Top Selling Items', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  const SizedBox(height: 16),
+                  ...itemSales.entries.map((e) => Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(color: _kCard, borderRadius: BorderRadius.circular(16)),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(color: _kAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                          child: const Icon(Icons.fastfood, color: _kAccent, size: 20),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(child: Text(e.key, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                        Text('${e.value} sold', style: const TextStyle(color: Colors.white54, fontSize: 13)),
+                      ],
+                    ),
+                  )),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

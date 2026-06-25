@@ -48,7 +48,7 @@ class HodPassDetailScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(pass.studentName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                            Text('Reg: ${pass.regNo ?? "N/A"}', style: TextStyle(color: Colors.grey.shade600)),
+                            Text('Reg: ${(pass.regNo == null || pass.regNo!.isEmpty) ? "Staff/Faculty Member" : pass.regNo}', style: TextStyle(color: Colors.grey.shade600)),
                             const SizedBox(height: 4),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

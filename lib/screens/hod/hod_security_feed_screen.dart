@@ -55,30 +55,37 @@ class HodSecurityFeedScreen extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: isSuccess ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
-                        shape: BoxShape.circle,
+                      Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: isSuccess ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.transparent,
+                          backgroundImage: log['profileImageUrl'] != null ? NetworkImage(log['profileImageUrl']) : null,
+                          child: log['profileImageUrl'] == null 
+                            ? Icon(isSuccess ? Icons.person : Icons.report_problem, color: isSuccess ? Colors.green : Colors.red)
+                            : null,
+                        ),
                       ),
-                      child: Icon(
-                        isSuccess ? Icons.login_rounded : Icons.report_problem_rounded,
-                        color: isSuccess ? Colors.green : Colors.red,
-                        size: 24,
-                      ),
-                    ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
+                            log['studentName'] ?? 'Unknown Student',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          Text(
                             result,
-                            style: TextStyle(fontWeight: FontWeight.bold, color: isSuccess ? Colors.green.shade700 : Colors.red.shade700),
+                            style: TextStyle(fontWeight: FontWeight.w600, color: isSuccess ? Colors.green.shade700 : Colors.red.shade700, fontSize: 13),
                           ),
                           Text(
                             'Scanned by: $scannedBy',
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            style: const TextStyle(fontSize: 11, color: Colors.grey),
                           ),
                         ],
                       ),

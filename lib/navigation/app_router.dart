@@ -6,6 +6,8 @@ import '../screens/auth/signup_screen.dart';
 import '../screens/auth/role_selection_screen.dart';
 import '../core/constants/app_constants.dart';
 
+import '../screens/faculty/faculty_dashboard.dart';
+import '../screens/faculty/faculty_apply_pass_screen.dart';
 import '../screens/student/student_dashboard.dart';
 import '../screens/student/apply_pass_screen.dart';
 import '../screens/student/active_pass_screen.dart';
@@ -20,11 +22,20 @@ import '../screens/mentor/mentor_edit_profile_screen.dart';
 import '../screens/mentor/mentor_students_screen.dart';
 import '../screens/hod/hod_dashboard.dart';
 import '../screens/hod/hod_profile_screen.dart';
+import '../screens/hod/hod_edit_profile_screen.dart';
 import '../screens/security/security_dashboard.dart';
 import '../screens/security/qr_scanner_screen.dart';
+import '../screens/security/security_log_history_screen.dart';
 import '../screens/canteen/canteen_dashboard.dart';
+import '../screens/shared/gate_pass_detail_screen.dart';
+import '../screens/shared/notice_detail_screen.dart';
+import '../screens/hod/hod_notices_screen.dart';
+import '../screens/shared/about_app_screen.dart';
 import '../screens/splash_screen.dart';
+import '../screens/admin/admin_dashboard.dart';
+import '../screens/admin/admin_staff_registration_screen.dart';
 import '../models/gate_pass_model.dart';
+import '../models/notice_model.dart';
 
 class AppRouter {
   static final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -93,6 +104,23 @@ class AppRouter {
         ]
       ),
       GoRoute(
+        path: '/faculty',
+        builder: (context, state) => const FacultyDashboard(),
+        routes: [
+          GoRoute(
+            path: 'apply',
+            builder: (context, state) => const FacultyApplyPassScreen(),
+          ),
+          GoRoute(
+            path: 'epass',
+            builder: (context, state) {
+              final pass = state.extra as GatePassModel;
+              return ActivePassScreen(pass: pass);
+            },
+          ),
+        ]
+      ),
+      GoRoute(
         path: '/mentor',
         builder: (context, state) => const MentorDashboard(),
         routes: [
@@ -114,6 +142,10 @@ class AppRouter {
             path: 'profile',
             builder: (context, state) => const HodProfileScreen(),
           ),
+          GoRoute(
+            path: 'edit_profile',
+            builder: (context, state) => const HodEditProfileScreen(),
+          ),
         ]
       ),
       GoRoute(
@@ -124,11 +156,41 @@ class AppRouter {
             path: 'scan',
             builder: (context, state) => const QrScannerScreen(),
           ),
+          GoRoute(
+            path: 'history',
+            builder: (context, state) => const SecurityLogHistoryScreen(),
+          ),
         ]
       ),
       GoRoute(
         path: '/canteen',
         builder: (context, state) => const CanteenDashboard(),
+      ),
+      GoRoute(
+        path: '/admin',
+        builder: (context, state) => const AdminDashboard(),
+        routes: [
+          GoRoute(
+            path: 'register_staff',
+            builder: (context, state) => const AdminStaffRegistrationScreen(),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/gate_pass_detail/:passId',
+        builder: (context, state) => GatePassDetailScreen(passId: state.pathParameters['passId']!),
+      ),
+      GoRoute(
+        path: '/notice_detail',
+        builder: (context, state) => NoticeDetailScreen(notice: state.extra as NoticeModel),
+      ),
+      GoRoute(
+        path: '/hod/notices',
+        builder: (context, state) => const HodNoticesScreen(),
+      ),
+      GoRoute(
+        path: '/about',
+        builder: (context, state) => const AboutAppScreen(),
       ),
     ],
   );

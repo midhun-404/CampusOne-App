@@ -5,6 +5,7 @@ import '../../services/auth_service.dart';
 import '../../models/user_model.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/constants/app_constants.dart';
+import 'faculty_account_request_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final String role;
@@ -38,16 +39,21 @@ class _LoginScreenState extends State<LoginScreen> {
       if (role != null) {
         if (role == AppConstants.roleStudent) {
           context.go('/student');
-        } else if (role == AppConstants.roleMentor)
+        } else if (role == AppConstants.roleMentor) {
           context.go('/mentor');
-        else if (role == AppConstants.roleHod)
+        } else if (role == AppConstants.roleFaculty) {
+          context.go('/faculty');
+        } else if (role == AppConstants.roleHod) {
           context.go('/hod');
-        else if (role == AppConstants.roleSecurity)
+        } else if (role == AppConstants.roleSecurity) {
           context.go('/security');
-        else if (role == AppConstants.roleCanteen)
+        } else if (role == AppConstants.roleCanteen) {
           context.go('/canteen');
-        else
+        } else if (role == AppConstants.roleAdmin) {
+          context.go('/admin');
+        } else {
           context.go('/');
+        }
       } else {
         context.go('/');
       }
@@ -113,6 +119,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Text("Student? Create an account"),
                   )
                 ],
+                if (widget.role == AppConstants.roleFaculty ||
+                    widget.role == AppConstants.roleMentor) ...[
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const FacultyAccountRequestScreen()),
+                    ),
+                    icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+                    label: const Text('Request a New Account'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.primaryBlue,
+                      side: const BorderSide(color: AppTheme.primaryBlue),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 32),
                 const Divider(),
                 TextButton.icon(
@@ -146,7 +169,12 @@ class _LoginScreenState extends State<LoginScreen> {
               Text('HODs (pass: hod123):', style: TextStyle(fontWeight: FontWeight.bold)),
               Text('hod_cse@campusone.edu\nhod_ece@campusone.edu\nhod_eee@campusone.edu\nhod_mech@campusone.edu\nhod_civil@campusone.edu\n'),
               Text('Mentors (pass: mentor123):', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('mentor_cse@campusone.edu\nmentor_ece@campusone.edu\nmentor_eee@campusone.edu\nmentor_mech@campusone.edu\nmentor_civil@campusone.edu'),
+              Text('Email: mentor_cse@campusone.edu\nmentor_ece@campusone.edu\nmentor_eee@campusone.edu\nmentor_mech@campusone.edu\nmentor_civil@campusone.edu\n'),
+              Text('Faculty (pass: faculty123):', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('Email: faculty_cse@campusone.edu\n'),
+              Divider(),
+              Text('Admin:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('Email: admin@sgmsa.edu\nPass: admin123'),
             ],
           ),
         ),

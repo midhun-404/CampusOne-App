@@ -77,7 +77,15 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
 
       // Log the scan - This might trigger permission-denied
       try {
-        await fs.logGatePassScan(passId, authService.currentUser?.name ?? 'Security', resultMsg, pass.department);
+        await fs.logGatePassScan(
+          passId: passId, 
+          studentName: pass.studentName,
+          scannedBy: authService.currentUser?.name ?? 'Security', 
+          result: resultMsg, 
+          department: pass.department,
+          profileImageUrl: pass.profileImageUrl,
+          isStaff: pass.regNo == null || pass.regNo!.isEmpty,
+        );
       } catch (e) {
         debugPrint('Logging failed: $e');
         // We continue even if logging fails, unless the main update fails

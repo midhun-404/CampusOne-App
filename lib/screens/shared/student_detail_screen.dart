@@ -6,9 +6,16 @@ import '../../core/theme/app_theme.dart';
 import '../../core/constants/app_constants.dart';
 import '../../services/auth_service.dart';
 
-class StudentDetailScreen extends StatelessWidget {
+class StudentDetailScreen extends StatefulWidget {
   final UserModel student;
   const StudentDetailScreen({super.key, required this.student});
+
+  @override
+  State<StudentDetailScreen> createState() => _StudentDetailScreenState();
+}
+
+class _StudentDetailScreenState extends State<StudentDetailScreen> {
+  bool _isDeleting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +32,15 @@ class StudentDetailScreen extends StatelessWidget {
         foregroundColor: AppTheme.primaryBlue,
         actions: [
           if (isHod)
-            IconButton(
-              icon: const Icon(Icons.delete_forever, color: Colors.red),
-              onPressed: () => _confirmRemoveStudent(context, fs),
-            ),
+            _isDeleting
+                ? const Padding(
+                    padding: EdgeInsets.only(right: 16.0),
+                    child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+                  )
+                : IconButton(
+                    icon: const Icon(Icons.delete_forever, color: Colors.red),
+                    onPressed: () => _confirmRemoveStudent(context, fs),
+                  ),
         ],
       ),
       body: SingleChildScrollView(
@@ -54,24 +66,24 @@ class StudentDetailScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    backgroundImage: student.profileImageUrl != null ? NetworkImage(student.profileImageUrl!) : null,
-                    child: student.profileImageUrl == null ? const Icon(Icons.person, size: 60) : null,
+                    backgroundImage: widget.student.profileImageUrl != null ? NetworkImage(widget.student.profileImageUrl!) : null,
+                    child: widget.student.profileImageUrl == null ? const Icon(Icons.person, size: 60) : null,
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    student.name,
+                    widget.student.name,
                     style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    student.regNo ?? 'N/A',
+                    widget.student.regNo ?? 'N/A',
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
                   ),
                   const SizedBox(height: 24),
                   const Divider(),
-                  _buildInfoRow(Icons.school, 'Department', student.department ?? 'N/A'),
-                  _buildInfoRow(Icons.class_, 'Semester/Division', '${student.semester ?? "N/A"} - ${student.division ?? "N/A"}'),
-                  _buildInfoRow(Icons.email, 'Email Address', student.email),
-                  _buildInfoRow(Icons.phone, 'Parent Contact', student.parentPhone ?? 'N/A'),
+                  _buildInfoRow(Icons.school, 'Department', widget.student.department ?? 'N/A'),
+                  _buildInfoRow(Icons.class_, 'Semester/Division', '${widget.student.semester ?? "N/A"} - ${widget.student.division ?? "N/A"}'),
+                  _buildInfoRow(Icons.email, 'Email Address', widget.student.email),
+                  _buildInfoRow(Icons.phone, 'Parent Contact', widget.student.parentPhone ?? 'N/A'),
                 ],
               ),
             ),
@@ -152,13 +164,13 @@ class StudentDetailScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Reset Device ID?'),
-        content: Text('Confirm reset for ${student.name}? This will allow them to login on a new device.'),
+        content: Text('Confirm reset for ${widget.student.name}? This will allow them to login on a new device.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
             onPressed: () async {
-              await fs.clearUserDeviceId(student.id);
+              await fs.clearUserDeviceId(widget.student.id);
               if (context.mounted) {
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Device ID Reset successfully!')));
@@ -176,17 +188,26 @@ class StudentDetailScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Remove Student?', style: TextStyle(color: Colors.red)),
-        content: Text('Are you sure you want to PERMANENTLY delete ${student.name} from the system?'),
+        content: Text('Are you sure you want to PERMANENTLY delete ${widget.student.name} from the system? This will erase all their passes and orders.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
             onPressed: () async {
-              await fs.deleteUser(student.id);
-              if (context.mounted) {
-                Navigator.pop(ctx);
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Student removed.')));
+              Navigator.pop(ctx);
+              setState(() => _isDeleting = true);
+              try {
+                await fs.deleteUser(widget.student.id);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Student and all related data removed.')));
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error removing student: $e')));
+                }
+              } finally {
+                if (mounted) setState(() => _isDeleting = false);
               }
             },
             child: const Text('Remove'),

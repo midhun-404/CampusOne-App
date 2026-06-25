@@ -23,42 +23,58 @@ class StudentProfileScreen extends StatelessWidget {
           children: [
             // Top Profile Header
             Stack(
-              alignment: Alignment.center,
+              clipBehavior: Clip.none,
+              alignment: Alignment.topCenter,
               children: [
+                // Blue banner
                 Container(
                   height: 200,
+                  width: double.infinity,
                   decoration: const BoxDecoration(
-                    color: AppTheme.primaryBlue,
-                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
+                    gradient: LinearGradient(
+                      colors: [AppTheme.primaryBlue, Color(0xFF1E3A8A)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(40),
+                      bottomRight: Radius.circular(40),
+                    ),
                   ),
                 ),
+                // Avatar centered at the bottom edge of the banner
                 Positioned(
-                  top: 80,
+                  bottom: -55,
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 4),
                       boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 15, offset: const Offset(0, 8))
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.18),
+                          blurRadius: 16,
+                          offset: const Offset(0, 8),
+                        )
                       ],
                     ),
                     child: CircleAvatar(
-                      radius: 65,
+                      radius: 55,
                       backgroundColor: Colors.grey.shade200,
                       backgroundImage: user.profileImageUrl != null
                           ? NetworkImage(user.profileImageUrl!)
                           : null,
                       child: user.profileImageUrl == null
-                          ? const Icon(Icons.person, size: 60, color: Colors.grey)
+                          ? const Icon(Icons.person, size: 50, color: Colors.grey)
                           : null,
                     ),
                   ),
                 ),
               ],
             ),
-            
-            const SizedBox(height: 70),
-            
+
+            // Space equal to half avatar + border so content starts below avatar
+            const SizedBox(height: 72),
+
             Text(
               user.name,
               style: TextStyle(
@@ -76,7 +92,7 @@ class StudentProfileScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                '${user.semester ?? 'N/A'} - ${user.department ?? 'N/A'}',
+                '${user.semester ?? 'N/A'} - Div ${user.division ?? 'N/A'}',
                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.primaryBlue),
               ),
             ),
@@ -180,7 +196,7 @@ class StudentProfileScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16, 
                     fontWeight: FontWeight.bold, 
-                    color: isDark ? Colors.white : AppTheme.primaryBlue,
+                    color: isDark ? Colors.white : AppTheme.darkSurface,
                   ),
                 ),
               ],

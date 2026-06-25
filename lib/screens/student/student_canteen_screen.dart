@@ -132,19 +132,106 @@ class _StudentCanteenScreenState extends State<StudentCanteenScreen> {
     });
     if (total == 0) return;
     _pendingOrderItems = orderItems;
-    _pendingTotal = total;
-    _razorpayOrderId = DateTime.now().millisecondsSinceEpoch.toString();
+    _pendingTotal     = total;
+    _razorpayOrderId  = DateTime.now().millisecondsSinceEpoch.toString();
 
-    try {
-      _razorpay.open({
-        'key': AppConstants.razorpayTestKey,
-        'amount': (total * 100).toInt(),
-        'name': 'CampusOne Canteen',
-        'description': 'Food Order',
-        'prefill': {'contact': '9999999999', 'email': authUser.email},
-      });
-    } catch (e) {
-      debugPrint('Razorpay error: $e');
+    // ── Payment Method Picker ──────────────────────────────────────────────
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(4)),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text('Choose Payment Method',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            Text('Total: ₹${total.toStringAsFixed(0)}',
+                style: const TextStyle(color: Colors.grey, fontSize: 13)),
+            const SizedBox(height: 20),
+
+            // Razorpay option
+            _PaymentOption(
+              icon: Icons.credit_card_rounded,
+              title: 'Online Payment',
+              subtitle: 'UPI, Card, Netbanking via Razorpay',
+              color: const Color(0xFF072654),
+              onTap: () {
+                Navigator.pop(ctx);
+                try {
+                  _razorpay.open({
+                    'key': AppConstants.razorpayTestKey,
+                    'amount': (total * 100).toInt(),
+                    'name': 'CampusOne Canteen',
+                    'description': 'Food Order',
+                    'prefill': {'contact': '9999999999', 'email': authUser.email},
+                  });
+                } catch (e) {
+                  debugPrint('Razorpay error: \$e');
+                }
+              },
+            ),
+            const SizedBox(height: 12),
+
+            // COD option
+            _PaymentOption(
+              icon: Icons.payments_outlined,
+              title: 'Pay at Counter',
+              subtitle: 'Place order now, pay when collecting',
+              color: const Color(0xFF2E7D32),
+              onTap: () {
+                Navigator.pop(ctx);
+                _placeCODOrder(authUser);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _placeCODOrder(dynamic authUser) async {
+    final fs = Provider.of<FirestoreService>(context, listen: false);
+    CanteenProfileModel? profile;
+    try { profile = await fs.getCanteenProfile().first; } catch (_) {}
+
+    final order = CanteenOrderModel(
+      id:              _razorpayOrderId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      studentId:       authUser.id,
+      studentName:     authUser.name,
+      studentPhone:    authUser.phone,
+      studentFcmToken: authUser.fcmToken,
+      items:           _pendingOrderItems ?? [],
+      totalAmount:     _pendingTotal,
+      paymentId:       'COD',
+      status:          'Pending',
+      orderTime:       DateTime.now(),
+      canteenName:     profile?.canteenName,
+    );
+
+    await fs.createCanteenOrder(order);
+
+    if (mounted) {
+      setState(() => _cart.clear());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('🧾 Order placed! Pay at the counter when collecting.'),
+          backgroundColor: Color(0xFF2E7D32),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      context.push('/student/canteen/orders');
     }
   }
 
@@ -607,3 +694,57 @@ class _CartBottomBar extends StatelessWidget {
     );
   }
 }
+
+// ─── Payment option tile ───────────────────────────────────────────────────────
+class _PaymentOption extends StatelessWidget {
+  final IconData     icon;
+  final String       title;
+  final String       subtitle;
+  final Color        color;
+  final VoidCallback onTap;
+  const _PaymentOption({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.06),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: color.withOpacity(0.2)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: color.withOpacity(0.12), shape: BoxShape.circle),
+              child: Icon(icon, color: color, size: 22),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: color)),
+                  const SizedBox(height: 2),
+                  Text(subtitle, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded, color: color, size: 14),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../models/gate_pass_model.dart';
+import '../../models/notice_model.dart';
+import '../../models/account_request_model.dart';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
@@ -15,6 +17,7 @@ import 'hod_mentor_team_screen.dart';
 import 'hod_pass_history_screen.dart';
 import 'hod_security_feed_screen.dart';
 import 'hod_profile_screen.dart';
+import 'hod_account_requests_screen.dart';
 
 class HodDashboard extends StatefulWidget {
   const HodDashboard({super.key});
@@ -48,7 +51,7 @@ class _HodDashboardState extends State<HodDashboard> {
     }
 
     return Scaffold(
-      backgroundColor: AppTheme.lightBg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
           // Premium Header
@@ -101,7 +104,7 @@ class _HodDashboardState extends State<HodDashboard> {
                                   const Icon(Icons.directions_run_rounded, color: Colors.white, size: 18),
                                   const SizedBox(width: 8),
                                   Text(
-                                    '${passes.length} Student${passes.length == 1 ? '' : 's'} Outside',
+                                    '${passes.length} Student${passes.length == 1 ? '' : 's'} Out Today',
                                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                                   ),
                                   const Spacer(),
@@ -117,7 +120,7 @@ class _HodDashboardState extends State<HodDashboard> {
                                 const SizedBox(height: 8),
                                 const Divider(color: Colors.white24, height: 1),
                                 const SizedBox(height: 8),
-                                ...passes.take(3).map((p) => Padding(
+                                ...passes.take(5).map((p) => Padding(
                                   padding: const EdgeInsets.only(bottom: 6),
                                   child: Row(
                                     children: [
@@ -141,8 +144,8 @@ class _HodDashboardState extends State<HodDashboard> {
                                     ],
                                   ),
                                 )),
-                                if (passes.length > 3)
-                                  Text('+${passes.length - 3} more', style: const TextStyle(color: Colors.white54, fontSize: 11)),
+                                if (passes.length > 5)
+                                  Text('+${passes.length - 5} more', style: const TextStyle(color: Colors.white54, fontSize: 11)),
                               ] else
                                 const Padding(
                                   padding: EdgeInsets.only(top: 6),
@@ -240,10 +243,29 @@ class _HodDashboardState extends State<HodDashboard> {
                 ),
                 _buildGridItem(
                   context,
-                  title: 'Broadcast',
-                  icon: Icons.campaign_rounded,
+                  title: 'Account Requests',
+                  icon: Icons.person_add_alt_1_rounded,
                   color: Colors.redAccent,
-                  onTap: () => _showBroadcastDialog(context, user.department!),
+                  badge: StreamBuilder<List<AccountRequestModel>>(
+                    stream: fs.getAccountRequestsStream(department: user.department),
+                    builder: (context, snapshot) {
+                      final count = snapshot.data?.length ?? 0;
+                      if (count == 0) return const SizedBox.shrink();
+                      return Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                        child: Text('$count', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                      );
+                    },
+                  ),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (ctx) => HodAccountRequestsScreen(department: user.department!))),
+                ),
+                _buildGridItem(
+                  context,
+                  title: 'Notice Board',
+                  icon: Icons.assignment_rounded,
+                  color: Colors.orangeAccent,
+                  onTap: () => context.push('/hod/notices'),
                 ),
                 _buildGridItem(
                   context,
@@ -336,39 +358,52 @@ class _HodDashboardState extends State<HodDashboard> {
     );
   }
 
-  Widget _buildGridItem(BuildContext context, {required String title, required IconData icon, required Color color, required VoidCallback onTap}) {
+  Widget _buildGridItem(BuildContext context, {required String title, required IconData icon, required Color color, required VoidCallback onTap, Widget? badge}) {
+    final surface = Theme.of(context).colorScheme.surface;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            )
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
+      child: Stack(
+        children: [
+          Container(
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: isDark ? Colors.black26 : Colors.black.withOpacity(0.05),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              )
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 32, color: color),
               ),
-              child: Icon(icon, size: 32, color: color),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: Colors.black87),
-            ),
-          ],
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
+          if (badge != null)
+            Positioned(top: 8, right: 8, child: badge),
+        ],
       ),
     );
   }

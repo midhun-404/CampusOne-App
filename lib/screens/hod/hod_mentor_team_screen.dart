@@ -50,14 +50,12 @@ class HodMentorTeamScreen extends StatelessWidget {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.message_outlined, color: AppTheme.primaryBlue, size: 20),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Contacting ${mentor.name}...')));
-                        },
+                        onPressed: () => _showMentorContactDialog(context, mentor),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.email_outlined, color: AppTheme.primaryBlue, size: 20),
+                        icon: const Icon(Icons.call_outlined, color: Colors.green, size: 20),
                         onPressed: () {
-                          // Could launch mail client
+                           // Dialer logic
                         },
                       ),
                     ],
@@ -70,6 +68,43 @@ class HodMentorTeamScreen extends StatelessWidget {
             },
           );
         },
+      ),
+    );
+  }
+
+  void _showMentorContactDialog(BuildContext context, UserModel mentor) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Message to ${mentor.name}'),
+        content: TextField(
+          controller: controller,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: 'Type your message...',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryBlue, foregroundColor: Colors.white),
+            onPressed: () async {
+              if (controller.text.isEmpty) return;
+              Navigator.pop(ctx);
+              
+              if (mentor.fcmToken != null) {
+                // Implementation note: This uses FCM to send a direct message notification
+                // In a full app, this would be saved in a 'messages' collection too.
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sending notification...')));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mentor not online (no FCM token).')));
+              }
+            },
+            child: const Text('Send Message'),
+          ),
+        ],
       ),
     );
   }

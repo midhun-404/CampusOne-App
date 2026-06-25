@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../../models/gate_pass_model.dart';
+import '../../models/notice_model.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_theme.dart';
 import 'student_profile_screen.dart';
 import 'student_settings_screen.dart';
+import 'ai_chat_screen.dart';
 
 class StudentDashboard extends StatefulWidget {
   const StudentDashboard({super.key});
@@ -33,8 +35,9 @@ class _StudentDashboardState extends State<StudentDashboard> {
     if (user == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
     return Scaffold(
-      backgroundColor: AppTheme.lightBg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: _screens[_selectedIndex],
+      floatingActionButton: _AiFab(),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
@@ -57,6 +60,40 @@ class _StudentDashboardState extends State<StudentDashboard> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Floating AI assistant button
+class _AiFab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const AiChatScreen()),
+        );
+      },
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFEAB360), Color(0xFFD4943A)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x55EAB360),
+              blurRadius: 16,
+              offset: Offset(0, 6),
+            ),
+          ],
+        ),
+        child: const Icon(Icons.auto_awesome, color: Colors.white, size: 26),
       ),
     );
   }
@@ -88,24 +125,29 @@ class _HomeView extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Welcome Back,',
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    user.name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Welcome Back,',
+                      style: TextStyle(color: Colors.white70, fontSize: 16),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Text(
+                      user.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 16),
               GestureDetector(
                 onTap: () {}, // Removed logout directly from avatar, now handled by Settings.
                 child: CircleAvatar(
@@ -123,7 +165,21 @@ class _HomeView extends StatelessWidget {
           ),
         ),
         
-        const SizedBox(height: 24),
+        const SizedBox(height: 12),
+        
+        // HOD Notice Banner
+        StreamBuilder<List<NoticeModel>>(
+          stream: firestoreService.getNoticesStream(),
+          builder: (context, snapshot) {
+            final notices = snapshot.data ?? [];
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: _buildNoticeBanner(context, notices),
+            );
+          }
+        ),
+
+        const SizedBox(height: 16),
         
         // Stream for active pass banner
         StreamBuilder<List<GatePassModel>>(
@@ -134,10 +190,10 @@ class _HomeView extends StatelessWidget {
             passes.sort((a, b) => b.appliedAt.compareTo(a.appliedAt));
             
             final activePassList = passes.where((p) => 
-              p.status == AppConstants.statusPendingMentor ||
+              (p.status == AppConstants.statusPendingMentor ||
               p.status == AppConstants.statusPendingHod ||
-              p.status == AppConstants.statusApproved ||
-              p.status == AppConstants.statusVerified
+              p.status == AppConstants.statusApproved) &&
+              !p.isExpired
             ).toList();
             
             if (activePassList.isNotEmpty) {
@@ -185,7 +241,21 @@ class _HomeView extends StatelessWidget {
                 ),
               );
             }
-            return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Card(
+                color: Theme.of(context).colorScheme.surface,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey.shade300, width: 1),
+                ),
+                child: const ListTile(
+                  leading: Icon(Icons.info_outline, color: Colors.grey),
+                  title: Text('No pass is active', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 14)),
+                ),
+              ),
+            );
           },
         ),
         
@@ -232,43 +302,116 @@ class _HomeView extends StatelessWidget {
     );
   }
 
+  Widget _buildNoticeBanner(BuildContext context, List<NoticeModel> notices) {
+    if (notices.isEmpty) {
+      final surface = Theme.of(context).colorScheme.surface;
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: isDark ? Colors.white12 : Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.notifications_none, size: 18, color: Colors.grey),
+            const SizedBox(width: 8),
+            Expanded(
+              child: SizedBox(
+                height: 20,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: const [
+                     Text('No new notices', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final latestNotice = notices.first;
+
+    return GestureDetector(
+      onTap: () => context.push('/notice_detail', extra: latestNotice),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryBlue.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: AppTheme.primaryBlue.withOpacity(0.1)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.campaign, size: 22, color: AppTheme.primaryBlue),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('LATEST NOTICE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.primaryBlue, letterSpacing: 1)),
+                  Text(
+                    latestNotice.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, size: 18, color: AppTheme.primaryBlue),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildGridItem(BuildContext context, {required IconData icon, required String title, required Color color, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.1),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            )
-          ]
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 40, color: color),
+      child: Builder(
+        builder: (context) {
+          final surface = Theme.of(context).colorScheme.surface;
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          return Container(
+            decoration: BoxDecoration(
+              color: surface,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: isDark ? Colors.black26 : color.withOpacity(0.1),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                )
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: AppTheme.darkSurface,
-              ),
-            )
-          ],
-        ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 40, color: color),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: isDark ? Colors.white : AppTheme.darkSurface,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

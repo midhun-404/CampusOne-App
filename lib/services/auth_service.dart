@@ -171,6 +171,10 @@ class AuthService extends ChangeNotifier {
       // Auto-set as Test Account if email contains specific test domains
       bool isTest = email.endsWith('@test.com') || email.endsWith('@test.campusone.edu');
 
+      // 4. Auto-find Mentor
+      final mentor = await _firestoreService.findMentorForClass(department, semester, division);
+      String? mentorId = mentor?.id;
+
       // 5. Create Firestore User Document
       UserModel newUser = UserModel(
         id: uid,
@@ -189,12 +193,67 @@ class AuthService extends ChangeNotifier {
         searchKeywords: keywords,
         createdAt: DateTime.now(),
         isTestAccount: isTest,
+        mentorId: mentorId,
       );
 
       await _firestoreService.createUser(newUser);
       _currentUser = newUser;
       _isInitialized = true; // Mark as Initialized so Splash routes properly
 
+      _isLoading = false;
+      _isRegistering = false;
+      notifyListeners();
+      return null; // Success
+    } on FirebaseAuthException catch (e) {
+      _isLoading = false;
+      _isRegistering = false;
+      notifyListeners();
+      return e.message ?? 'Registration failed';
+    } catch (e) {
+      _isLoading = false;
+      _isRegistering = false;
+      notifyListeners();
+      return e.toString();
+    }
+  }
+
+  Future<String?> registerStaff({
+    required String name,
+    required String email,
+    required String password,
+    required String role,
+    String? department,
+    String? semester,
+    String? division,
+    String? college,
+  }) async {
+    _isLoading = true;
+    _isRegistering = true;
+    notifyListeners();
+    try {
+      // 1. Create Auth User
+      UserCredential cred = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      String uid = cred.user!.uid;
+
+      // 2. Create Firestore User Document
+      UserModel newUser = UserModel(
+        id: uid,
+        name: name,
+        email: email,
+        role: role,
+        department: department,
+        semester: semester,
+        division: division,
+        college: college,
+        createdAt: DateTime.now(),
+      );
+
+      await _firestoreService.createUser(newUser);
+      
       _isLoading = false;
       _isRegistering = false;
       notifyListeners();
@@ -247,9 +306,14 @@ class AuthService extends ChangeNotifier {
       {'email': 'hod_civil@campusone.edu', 'pass': 'hod123', 'role': 'HOD', 'name': 'CIVIL HOD', 'dept': 'CIVIL', 'sem': '', 'div': ''},
       {'email': 'mentor_civil@campusone.edu', 'pass': 'mentor123', 'role': 'Mentor', 'name': 'CIVIL Mentor', 'dept': 'CIVIL', 'sem': 'S6', 'div': 'A'},
  
+      // Faculty 
+      {'email': 'faculty_cse@campusone.edu', 'pass': 'faculty123', 'role': 'Faculty', 'name': 'CSE Faculty', 'dept': 'CSE', 'sem': '', 'div': ''},
+      {'email': 'faculty@campusone.edu', 'pass': 'faculty123', 'role': 'Faculty', 'name': 'General Faculty', 'dept': 'CSE', 'sem': '', 'div': ''},
+
       // Global Staff
       {'email': 'security@campusone.edu', 'pass': 'security123', 'role': 'Security', 'name': 'Campus Security', 'dept': '', 'sem': '', 'div': ''},
       {'email': 'canteen@campusone.edu', 'pass': 'canteen123', 'role': 'Canteen', 'name': 'College Canteen', 'dept': '', 'sem': '', 'div': ''},
+      {'email': 'admin@sgmsa.edu', 'pass': 'admin123', 'role': 'Admin', 'name': 'System Administrator', 'dept': '', 'sem': '', 'div': ''},
     ];
 
     for (var s in staff) {

@@ -11,6 +11,16 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Helper function to check if user has HOD role
+    function isHod() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'HOD';
+    }
+
+    // Helper function to check if user is Faculty
+    function isFaculty() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Faculty';
+    }
+
     // Users collection rules
     match /users/{userId} {
       // Allow any authenticated user to read profiles (needed for Mentors to see student details)
@@ -19,6 +29,8 @@ service cloud.firestore {
       allow write: if isOwner(userId);
       // Allow mentors/admins to update specific fields like mentorId and deviceId
       allow update: if isAuthenticated();
+      // Allow HODs to delete profiles
+      allow delete: if isHod();
     }
     
     // Gate Passes rules
@@ -28,6 +40,8 @@ service cloud.firestore {
         allow create: if isAuthenticated(); 
         // Allow updates by any authenticated user (refined role-checks can be added later)
         allow update: if isAuthenticated();
+        // Allow HODs to delete pass requests
+        allow delete: if isHod();
     }
 
     // Gate Pass Logs rules
@@ -46,6 +60,13 @@ service cloud.firestore {
     match /canteen_profile/{docId} {
         allow read: if true;
         allow write: if isAuthenticated();
+    }
+
+    // Notices rules
+    match /notices/{noticeId} {
+        allow read: if isAuthenticated();
+        // Allow HODs to create, update, and delete notices
+        allow create, update, delete: if isHod();
     }
   }
 }

@@ -36,6 +36,15 @@ class SecurityDashboard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16)
               ),
             ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: () => context.push('/security/history'),
+              icon: const Icon(Icons.history, size: 28),
+              label: const Text('View Log History', style: TextStyle(fontSize: 18)),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16)
+              ),
+            ),
           ],
         ),
       ),

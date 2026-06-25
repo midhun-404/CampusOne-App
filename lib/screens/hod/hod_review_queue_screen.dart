@@ -63,7 +63,18 @@ class HodReviewQueueScreen extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('${pass.studentName} (${pass.department})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                  Row(
+                                    children: [
+                                      Flexible(child: Text('${pass.studentName} (${pass.department})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), overflow: TextOverflow.ellipsis)),
+                                      if (pass.regNo == null || pass.regNo!.isEmpty)
+                                        Container(
+                                          margin: const EdgeInsets.only(left: 8),
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(color: Colors.purple.shade50, borderRadius: BorderRadius.circular(4), border: Border.all(color: Colors.purple.shade200)),
+                                          child: const Text('STAFF', style: TextStyle(color: Colors.purple, fontSize: 10, fontWeight: FontWeight.bold)),
+                                        ),
+                                    ],
+                                  ),
                                   Text('Applied: ${DateFormat.yMd().add_jm().format(pass.appliedAt)}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
                                 ],
                               ),

@@ -7,6 +7,8 @@ import 'mentor_pending_screen.dart';
 import 'mentor_history_screen.dart';
 import '../student/student_settings_screen.dart';
 import 'mentor_profile_screen.dart';
+import '../faculty/faculty_notice_screen.dart';
+import 'mentor_active_outs_screen.dart';
 
 class MentorDashboard extends StatefulWidget {
   const MentorDashboard({super.key});
@@ -163,6 +165,24 @@ class _MentorHomeView extends StatelessWidget {
                 color: Colors.orange,
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(builder: (context) => const MentorProfileScreen()));
+                },
+              ),
+              _buildGridItem(
+                context, 
+                icon: Icons.campaign_rounded, 
+                title: 'Broadcast', 
+                color: Colors.purple,
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const FacultyNoticeScreen()));
+                },
+              ),
+              _buildGridItem(
+                context, 
+                icon: Icons.exit_to_app_rounded, 
+                title: 'Students Out', 
+                color: Colors.pink,
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const MentorActiveOutsScreen()));
                 },
               ),
             ],

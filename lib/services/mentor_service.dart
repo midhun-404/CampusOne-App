@@ -51,7 +51,14 @@ class MentorService {
         .where('department', isEqualTo: department)
         .where('semester', isEqualTo: semester)
         .where('division', isEqualTo: division)
-        .where('status', whereIn: [AppConstants.statusApproved, AppConstants.statusRejected, AppConstants.statusPendingHod])
+        .where('status', whereIn: [
+          AppConstants.statusApproved, 
+          AppConstants.statusRejected, 
+          AppConstants.statusPendingHod,
+          AppConstants.statusVerified,
+          AppConstants.statusUsed,
+          AppConstants.statusExpired
+        ])
         .snapshots()
         .map((snapshot) {
            final docs = snapshot.docs
