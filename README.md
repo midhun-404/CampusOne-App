@@ -50,7 +50,14 @@ If you want to run this project locally:
    ```
 
 ## 📸 Screenshots
-*(Add your screenshots here!)*
+<div align="center">
+  <img src="assets/screenshot/Screenshot_20260323_061236.jpg" width="200"/>
+  <img src="assets/screenshot/Screenshot_20260323_062421.jpg" width="200"/>
+  <img src="assets/screenshot/Screenshot_20260323_062437.jpg" width="200"/>
+  <img src="assets/screenshot/Screenshot_20260324_063727.jpg" width="200"/>
+  <img src="assets/screenshot/IMG_20260323_062457.jpg" width="200"/>
+  <img src="assets/screenshot/IMG_20260323_062516.jpg" width="200"/>
+</div>
 
 ---
 *Built with ❤️ for a smarter, digital campus experience.*
